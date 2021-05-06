@@ -27,6 +27,16 @@ int main(void)
         /* バッファクリア */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        /* バッファ描画開始 */
+        glBegin(GL_TRIANGLES);
+
+        glVertex2f(-0.5f, -0.5f);
+        glVertex2f(0.0f, 0.5f);
+        glVertex2f(0.5f, -0.5f);
+
+        /* バッファ描画終了 */
+        glEnd();
+
         /* フロントバッファとバックバッファ交換 */
         glfwSwapBuffers(window);
 
