@@ -1,7 +1,41 @@
 ﻿#include<iostream>
 
-int main()
+#include <GLFW/glfw3.h>
+
+int main(void)
 {
-	std::cout << "OpenGL" << std::endl;
-	std::cin.get();
+    GLFWwindow* window;
+
+    /* glfw初期化 */
+    if (!glfwInit())
+        return -1;
+
+    /* OpenGLウインドウとGLコンテキスト生成 */
+    window = glfwCreateWindow(640, 480, "Learn OpenGL", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    /* ウインドウのGLコンテキスト設定 */
+    glfwMakeContextCurrent(window);
+
+    /* ウインドウループ */
+    while (!glfwWindowShouldClose(window))
+    {
+        /* バッファクリア */
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        /* フロントバッファとバックバッファ交換 */
+        glfwSwapBuffers(window);
+
+        /* glfwイベント処理 */
+        glfwPollEvents();
+    }
+
+    /* glfw終了 */
+    glfwTerminate();
+
+    return 0;
 }
