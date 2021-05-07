@@ -1,5 +1,6 @@
 ﻿#include<iostream>
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 int main(void)
@@ -20,6 +21,16 @@ int main(void)
 
     /* GLコンテキスト生成 */
     glfwMakeContextCurrent(window);
+
+    /* glew初期化 */
+    if (glewInit() != GLEW_OK)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    // glew動くか検証:OPENGLパーション出力
+    std::cout << glGetString(GL_VERSION) << std::endl;
 
     /* ウインドウループ */
     while (!glfwWindowShouldClose(window))
