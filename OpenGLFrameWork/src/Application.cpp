@@ -10,15 +10,15 @@ int main(void)
     if (!glfwInit())
         return -1;
 
-    /* OpenGLウインドウとGLコンテキスト生成 */
-    window = glfwCreateWindow(640, 480, "Learn OpenGL", NULL, NULL);
+    /* glfwウインドウ作成 */
+    window = glfwCreateWindow(1024, 768, "Learn OpenGL", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
         return -1;
     }
 
-    /* ウインドウのGLコンテキスト設定 */
+    /* GLコンテキスト生成 */
     glfwMakeContextCurrent(window);
 
     /* ウインドウループ */
