@@ -32,21 +32,34 @@ int main(void)
     // glew動くか検証:OPENGLパーション出力
     std::cout << glGetString(GL_VERSION) << std::endl;
 
+    // 頂点情報
+    float vertices[6] = {
+        -0.5f, -0.5f,
+        0.0f, 0.5f,
+        0.5f, -0.5f
+    };
+
+    // 頂点バッファ(VBO)生成
+    unsigned int vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    // 頂点バッファ(VBO)バインド
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    // 頂点情報は頂点バッファへコピーとデータ種類設定
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // 頂点属性(インデックス、変数タイプと数量、オフセット..)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    // 定義された頂点属性を適用(インデックス)
+    glEnableVertexAttribArray(0);
+
     /* ウインドウループ */
     while (!glfwWindowShouldClose(window))
     {
         /* バッファクリア */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        /* バッファ描画開始 */
-        glBegin(GL_TRIANGLES);
-
-        glVertex2f(-0.5f, -0.5f);
-        glVertex2f(0.0f, 0.5f);
-        glVertex2f(0.5f, -0.5f);
-
-        /* バッファ描画終了 */
-        glEnd();
+        /* 頂点バッファ描画 */
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         /* フロントバッファとバックバッファ交換 */
         glfwSwapBuffers(window);
