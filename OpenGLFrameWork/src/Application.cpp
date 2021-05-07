@@ -124,24 +124,39 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     // 頂点情報
-    float vertices[6] = {
-        -0.5f, -0.5f,
-        0.0f, 0.5f,
-        0.5f, -0.5f
+    float vertices[] = {
+        -0.5f, -0.5f,   // 0
+         0.5f, -0.5f,   // 1
+         0.5f,  0.5f,   // 2
+        -0.5f,  0.5f    // 3
+    };
+
+    // インデックス情報
+    unsigned int indices[] = {
+        0,1,2,
+        2,3,0
     };
 
     // 頂点バッファ(VBO)生成
-    unsigned int vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
+    unsigned int vbo;
+    glGenBuffers(1, &vbo);
     // 頂点バッファ(VBO)バインド
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    // 頂点情報は頂点バッファへコピーとデータ種類設定
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // 頂点情報は頂点バッファへコピーとデータ扱い設定 (size = num * sizeof(float) * (vec2/float))
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 2, vertices, GL_STATIC_DRAW);
 
     // 頂点属性(インデックス、変数タイプと数量、オフセット..)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
     // 定義された頂点属性を適用(インデックス)
     glEnableVertexAttribArray(0);
+
+    // インデックスバッファ(IBO)生成
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+    // インデックスバッファ(IBO)バインド
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    // インデックスバッファへコピーとデータ扱い設定 (size = num * sizeof(unsigned int))
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // シェーダソースコート解析
     ShaderProgramSource source = parseShader("res/shaders/Basic.shader");
@@ -156,8 +171,8 @@ int main(void)
         /* バッファクリア */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        /* 頂点バッファ描画 */
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        /* インデックスバッファ描画 */
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         /* フロントバッファとバックバッファ交換 */
         glfwSwapBuffers(window);
