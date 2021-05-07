@@ -1,7 +1,54 @@
-﻿#include<iostream>
-
-#include <GL/glew.h>
+﻿#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<sstream>
+
+struct ShaderProgramSource
+{
+    std::string VertexSource;
+    std::string FragmengSource;
+};
+
+static ShaderProgramSource parseShader(const std::string& filepath)
+{
+    std::ifstream stream(filepath);
+
+    enum class shaderType
+    {
+        NONE = -1,
+        VERTEX,
+        FRAGMENT
+    };
+
+    std::string line;
+    std::stringstream ss[2];
+
+    shaderType type = shaderType::NONE;
+    // ファイル文字列解析
+    while (getline(stream, line))
+    {
+        if (line.find("#shader") != std::string::npos)
+        {
+            if (line.find("vertex") != std::string::npos)
+            {
+                type = shaderType::VERTEX;
+            }
+            else  if (line.find("fragment") != std::string::npos)
+            {
+                type = shaderType::FRAGMENT;
+            }
+        }
+        else
+        {
+            ss[static_cast<int>(type)] << line << "\n";
+        }
+    }
+
+    return { ss[0].str(), ss[1].str() };
+}
 
 static unsigned int compileShader(unsigned int type, const std::string& source)
 {
@@ -13,6 +60,7 @@ static unsigned int compileShader(unsigned int type, const std::string& source)
     int result;
     glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
+    // エラーハンドリング
     if (result == GL_FALSE)
     {
         int length;
@@ -95,28 +143,10 @@ int main(void)
     // 定義された頂点属性を適用(インデックス)
     glEnableVertexAttribArray(0);
 
-    std::string vs =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) in vec4 position;\n"
-        "\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position = position;\n"
-        "}\n";
-
-    std::string fs =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) out vec4 color;\n"
-        "\n"
-        "void main()\n"
-        "{\n"
-        "   color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-        "}\n";
-
+    // シェーダソースコート解析
+    ShaderProgramSource source = parseShader("res/shaders/Basic.shader");
     // シェーダコンパイル
-    unsigned int shader = createShader(vs,fs);
+    unsigned int shader = createShader(source.VertexSource, source.FragmengSource);
     // シェーダプログラム使用
     glUseProgram(shader);
 
@@ -136,8 +166,9 @@ int main(void)
         glfwPollEvents();
     }
 
-    // シェーダ解放
-    glDeleteShader(shader);
+    // シェーダプログラム解放
+    glDeleteProgram(shader);
+    
     /* glfw終了 */
     glfwTerminate();
 
