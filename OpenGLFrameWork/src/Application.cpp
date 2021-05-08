@@ -6,11 +6,33 @@
 #include<string>
 #include<sstream>
 
+#define ASSERT(x) if(!(x)) __debugbreak();
+
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
 struct ShaderProgramSource
 {
     std::string VertexSource;
     std::string FragmengSource;
 };
+
+static void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const std::string& function, const std::string& file, int line)
+{
+    GLenum error = glGetError();
+    while (error != GL_NO_ERROR)
+    {
+        std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
+        return false;
+    }
+    return true;
+}
 
 static ShaderProgramSource parseShader(const std::string& filepath)
 {
@@ -139,31 +161,31 @@ int main(void)
 
     // 頂点バッファ(VBO)生成
     unsigned int vbo;
-    glGenBuffers(1, &vbo);
+    GLCall(glGenBuffers(1, &vbo));
     // 頂点バッファ(VBO)バインド
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // 頂点情報は頂点バッファへコピーとデータ扱い設定 (size = num * sizeof(float) * (vec2/float))
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 2, vertices, GL_STATIC_DRAW);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    // 頂点情報は頂点バッファへコピーとデータ扱い設定
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
 
     // 頂点属性(インデックス、変数タイプと数量、オフセット..)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
     // 定義された頂点属性を適用(インデックス)
-    glEnableVertexAttribArray(0);
+    GLCall(glEnableVertexAttribArray(0));
 
     // インデックスバッファ(IBO)生成
     unsigned int ibo;
-    glGenBuffers(1, &ibo);
+    GLCall(glGenBuffers(1, &ibo));
     // インデックスバッファ(IBO)バインド
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    // インデックスバッファへコピーとデータ扱い設定 (size = num * sizeof(unsigned int))
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    // インデックスバッファへコピーとデータ扱い設定
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW));
 
     // シェーダソースコート解析
     ShaderProgramSource source = parseShader("res/shaders/Basic.shader");
     // シェーダコンパイル
     unsigned int shader = createShader(source.VertexSource, source.FragmengSource);
-    // シェーダプログラム使用
-    glUseProgram(shader);
+    /* シェーダプログラム使用 */
+    GLCall(glUseProgram(shader));
 
     /* ウインドウループ */
     while (!glfwWindowShouldClose(window))
@@ -172,7 +194,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* インデックスバッファ描画 */
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         /* フロントバッファとバックバッファ交換 */
         glfwSwapBuffers(window);
@@ -181,7 +203,7 @@ int main(void)
         glfwPollEvents();
     }
 
-    // シェーダプログラム解放
+    /* シェーダプログラム解放 */
     glDeleteProgram(shader);
     
     /* glfw終了 */
