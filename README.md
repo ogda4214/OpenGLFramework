@@ -1,2 +1,2 @@
 # OpenGLFramework
-Leran OpenGL
+Learn OpenGL(using GLEW and GLFW)
