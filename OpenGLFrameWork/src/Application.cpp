@@ -135,6 +135,9 @@ int main(void)
     /* GLコンテキスト生成 */
     glfwMakeContextCurrent(window);
 
+    /* スウップチェーン間隔設定 = (fps) */
+    glfwSwapInterval(1);
+
     /* glew初期化 */
     if (glewInit() != GLEW_OK)
     {
@@ -187,6 +190,13 @@ int main(void)
     /* シェーダプログラム使用 */
     GLCall(glUseProgram(shader));
 
+    // シェーダUniform使用
+    GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+    ASSERT(location != -1);
+    GLCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
+    
+    float r = 0.0f;
+    float increment = 0.05f;
     /* ウインドウループ */
     while (!glfwWindowShouldClose(window))
     {
@@ -194,7 +204,19 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         /* インデックスバッファ描画 */
+        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        if (r > 1.0f)
+        {
+            increment = -0.05f;
+        }
+        else if (r < 0.0f)
+        {
+            increment = 0.05f;
+        }
+
+        r += increment;
 
         /* フロントバッファとバックバッファ交換 */
         glfwSwapBuffers(window);
