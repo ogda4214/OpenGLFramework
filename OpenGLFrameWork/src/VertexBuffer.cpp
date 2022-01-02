@@ -9,7 +9,6 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size)
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
     // 頂点情報は頂点バッファへコピーとデータ扱い設定
     GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
-
 }
 
 VertexBuffer::~VertexBuffer()

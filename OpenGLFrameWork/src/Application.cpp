@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 struct ShaderProgramSource
 {
@@ -150,19 +151,15 @@ int main(void)
             2,3,0
         };
 
-        unsigned int vao;
-        // 頂点配列(VAO)生成
-        GLCall(glGenVertexArrays(1, &vao))
-        // 頂点配列(VAO)バインド
-        GLCall(glBindVertexArray(vao))
-
+        // 頂点配列生成
+        VertexArray va;
         // 頂点バッファ生成
         VertexBuffer vb(vertices, 4 * 2 * sizeof(float));
-
-        // 定義された頂点属性を適用(インデックス)
-        GLCall(glEnableVertexAttribArray(0));
-        // 頂点属性設定(VAOと関連)(インデックス、変数タイプと数量、オフセット..)
-        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
+        // 頂点レイアウト生成
+        VertexBufferLayout layout;
+        layout.Push<float>(2);
+        // 頂点配列設定
+        va.AddBuffer(vb, layout);
 
         // インデックスバッファ生成
         IndexBuffer ib(indices, 6);
@@ -180,7 +177,7 @@ int main(void)
         GLCall(glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f));
 
         /* デフォルトバインド */
-        GLCall(glBindVertexArray(0));
+        va.Unbind();
         GLCall(glUseProgram(0));
         GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
         GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
@@ -196,13 +193,8 @@ int main(void)
             GLCall(glUseProgram(shader));
             GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
 
-            // 定義された頂点属性を適用(インデックス)
-            //GLCall(glEnableVertexAttribArray(0));
-            // 頂点属性(インデックス、変数タイプと数量、オフセット..)
-            //GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
-
-            // 頂点配列(VAO)バインド
-            GLCall(glBindVertexArray(vao));
+            // 頂点配列バインド
+            va.Bind();
             // インデックスバッファバインド
             ib.Bind();
 
