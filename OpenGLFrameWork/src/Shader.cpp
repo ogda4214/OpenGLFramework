@@ -8,8 +8,8 @@
 #include "Renderer.h"
 
 Shader::Shader(const std::string& filepath)
-	: m_FilePath(filepath),
-	m_RendererID(0)
+	: m_FilePath(filepath)
+	, m_RendererID(0)
 {
     // シェーダソースコート解析
     ShaderProgramSource source = ParseShader(filepath);
@@ -31,6 +31,11 @@ void Shader::Bind() const
 void Shader::Unbind() const
 {
     GLCall(glUseProgram(0));
+}
+
+void Shader::SetUniform1i(const std::string& name, int value)
+{
+    GLCall(glUniform1i(GetUniformLocation(name), value));
 }
 
 void Shader::SetUniform1f(const std::string& name, float value)

@@ -12,6 +12,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -53,10 +54,10 @@ int main(void)
     {
         // 頂点情報
         float vertices[] = {
-            -0.5f, -0.5f,   // 0
-             0.5f, -0.5f,   // 1
-             0.5f,  0.5f,   // 2
-            -0.5f,  0.5f    // 3
+            -0.5f, -0.5f, 0.0f, 0.0f,  // 0
+             0.5f, -0.5f, 1.0f, 0.0f,  // 1
+             0.5f,  0.5f, 1.0f, 1.0f, // 2
+            -0.5f,  0.5f, 0.0f, 1.0f  // 3
         };
 
         // インデックス情報
@@ -65,12 +66,16 @@ int main(void)
             2,3,0
         };
 
+        GLCall(glEnable(GL_BLEND))
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+
         // 頂点配列生成
         VertexArray va;
         // 頂点バッファ生成
-        VertexBuffer vb(vertices, 4 * 2 * sizeof(float));
+        VertexBuffer vb(vertices, 4 * 4 * sizeof(float));
         // 頂点レイアウト生成
         VertexBufferLayout layout;
+        layout.Push<float>(2);
         layout.Push<float>(2);
         // 頂点配列設定
         va.AddBuffer(vb, layout);
@@ -84,6 +89,12 @@ int main(void)
         shader.Bind();
         // シェーダUniform使用
         shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+
+        // テクスチャ使用
+        Texture texture("res/texture/bg.png");
+        texture.Bind(0);
+        // シェーダUniform使用
+        shader.SetUniform1i("u_Texture", 0);
 
         /* デフォルトバインド */
         va.Unbind();
