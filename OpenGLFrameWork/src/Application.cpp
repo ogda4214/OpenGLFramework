@@ -20,6 +20,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include "prototype/ClearColorObject.h"
+
 int main(void)
 {
     GLFWwindow* window;
@@ -101,9 +103,11 @@ int main(void)
         IndexBuffer ib(indices, 6);
 
         // モデル
-        glm::vec3 translate(0.0f, 1.0f, 0.0f);
+        glm::vec3 translationA(-1.0f, 0.0f, 0.0f);
+        // モデル
+        glm::vec3 translationB(1.0f, 0.0f, 0.0f);
         // カメラ
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -1.0f, 0.0f));
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
         // 正規投影マトリックス 4:3
         glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
 
@@ -129,11 +133,18 @@ int main(void)
         shader.Unbind();
         Renderer renderer;
 
+        // プロトタイプ
+        Prototype::ClearColorObject obj;
+
         /* ウインドウループ */
         while (!glfwWindowShouldClose(window))
         {
             // レンダラークリア
             renderer.Clear();
+
+            // プロトタイプ
+            obj.onUpdate(0.0f);
+            obj.onRender();
 
             // IMGUIフレーム開始
             ImGui_ImplOpenGL3_NewFrame();
@@ -141,25 +152,37 @@ int main(void)
             ImGui::NewFrame();
 
             // MVPマトリックス計算
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translate);
-            glm::mat4 mvp = proj * view * model;
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
+                glm::mat4 mvp = proj * view * model;
 
-            // シェーダバインド
-            shader.Bind();
-            shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
-            shader.SetUniformMat4f("u_MVP", mvp);
+                // シェーダバインド
+                shader.Bind();
+                shader.SetUniformMat4f("u_MVP", mvp);
+                shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
+                // レンダラー描画
+                renderer.Draw(va, ib, shader);
+            }
 
-            // 頂点配列バインド
-            va.Bind();
-            // インデックスバッファバインド
-            ib.Bind();
-            // レンダラー描画
-            renderer.Draw(va, ib, shader);
+            // MVPマトリックス計算
+            {
+                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
+                glm::mat4 mvp = proj * view * model;
+
+                // シェーダバインド
+                shader.Bind();
+                shader.SetUniformMat4f("u_MVP", mvp);
+                shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
+                // レンダラー描画
+                renderer.Draw(va, ib, shader);
+            }
 
             // IMGUI処理
             {
                 ImGui::Begin("Debug Menu");
-                ImGui::SliderFloat3("Translation", &translate.x, 4.0, -4.0f);
+                obj.onImGuiRender();
+                ImGui::SliderFloat3("Translation A", &translationA.x, -4.0, 4.0f);
+                ImGui::SliderFloat3("Translation B", &translationB.x, -4.0, 4.0f);
                 ImGui::ColorEdit3("Color", (float*)&color);
                 // FPS表示
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
