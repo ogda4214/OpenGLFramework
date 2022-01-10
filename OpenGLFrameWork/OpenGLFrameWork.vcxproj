@@ -157,6 +157,7 @@
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\prototype\BaseObject.cpp" />
     <ClCompile Include="src\prototype\ClearColorObject.cpp" />
+    <ClCompile Include="src\prototype\Texture2DObject.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Texture.cpp" />
@@ -316,6 +317,7 @@
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\prototype\BaseObject.h" />
     <ClInclude Include="src\prototype\ClearColorObject.h" />
+    <ClInclude Include="src\prototype\Texture2DObject.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Texture.h" />

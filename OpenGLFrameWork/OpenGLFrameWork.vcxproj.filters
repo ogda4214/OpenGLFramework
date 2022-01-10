@@ -20,6 +20,7 @@
     <ClCompile Include="src\vendor\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\prototype\BaseObject.cpp" />
     <ClCompile Include="src\prototype\ClearColorObject.cpp" />
+    <ClCompile Include="src\prototype\Texture2DObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader\Basic.shader" />
@@ -462,5 +463,6 @@
     <ClInclude Include="src\vendor\imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="src\prototype\BaseObject.h" />
     <ClInclude Include="src\prototype\ClearColorObject.h" />
+    <ClInclude Include="src\prototype\Texture2DObject.h" />
   </ItemGroup>
 </Project>

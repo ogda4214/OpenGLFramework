@@ -7,20 +7,13 @@
 #include<sstream>
 
 #include "Renderer.h"
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "prototype/ClearColorObject.h"
+#include "prototype/Texture2DObject.h"
 
 int main(void)
 {
@@ -62,20 +55,6 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     {
-        // 頂点情報
-        float vertices[] = {
-            -0.5f, -0.5f, 0.0f, 0.0f,  // 0
-             0.5f, -0.5f, 1.0f, 0.0f,  // 1
-             0.5f,  0.5f, 1.0f, 1.0f, // 2
-            -0.5f,  0.5f, 0.0f, 1.0f  // 3
-        };
-
-        // インデックス情報
-        unsigned int indices[] = {
-            0,1,2,
-            2,3,0
-        };
-
         // IMGUIコンテキスト生成
         ImGui::CreateContext();
         //ImGuiIO& io = ImGui::GetIO(); (void)io; io設定
@@ -88,102 +67,40 @@ int main(void)
         GLCall(glEnable(GL_BLEND))
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
 
-        // 頂点配列生成
-        VertexArray va;
-        // 頂点バッファ生成
-        VertexBuffer vb(vertices, 4 * 4 * sizeof(float));
-        // 頂点レイアウト生成
-        VertexBufferLayout layout;
-        layout.Push<float>(2);
-        layout.Push<float>(2);
-        // 頂点配列設定
-        va.AddBuffer(vb, layout);
-
-        // インデックスバッファ生成
-        IndexBuffer ib(indices, 6);
-
-        // モデル
-        glm::vec3 translationA(-1.0f, 0.0f, 0.0f);
-        // モデル
-        glm::vec3 translationB(1.0f, 0.0f, 0.0f);
-        // カメラ
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-        // 正規投影マトリックス 4:3
-        glm::mat4 proj = glm::ortho(-4.0f, 4.0f, -3.0f, 3.0f, -1.0f, 1.0f);
-
-
-        // シェーダ生成
-        Shader shader("res/shaders/Basic.shader");
-        // シェーダ使用
-        shader.Bind();
-        // シェーダUniform使用
-        ImVec4 color = ImVec4(0.2f, 0.3f, 0.8f, 1.0f);
-        shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
-
-        // テクスチャ使用
-        Texture texture("res/texture/awesomeface.png");
-        texture.Bind(0);
-        // シェーダUniform使用
-        shader.SetUniform1i("u_Texture", 0);
-
-        /* デフォルトバインド */
-        va.Unbind();
-        vb.Unbind();
-        ib.Unbind();
-        shader.Unbind();
         Renderer renderer;
 
         // プロトタイプ
-        Prototype::ClearColorObject obj;
+        Prototype::BaseObject* obj = nullptr;
+        Prototype::MenuObject* testmenu = new Prototype::MenuObject(obj);
+        obj = testmenu;
+
+        testmenu->RegisterObject<Prototype::ClearColorObject>("Clear Color");
+        testmenu->RegisterObject<Prototype::Texture2DObject>("2D Texture");
 
         /* ウインドウループ */
         while (!glfwWindowShouldClose(window))
         {
+            GLCall(glClearColor(0.0f,0.0f,0.0f,1.0f))
             // レンダラークリア
             renderer.Clear();
-
-            // プロトタイプ
-            obj.onUpdate(0.0f);
-            obj.onRender();
 
             // IMGUIフレーム開始
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
-            // MVPマトリックス計算
+            if (obj)
             {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
-                glm::mat4 mvp = proj * view * model;
+                obj->onUpdate(0.0f);
+                obj->onRender();
 
-                // シェーダバインド
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
-                // レンダラー描画
-                renderer.Draw(va, ib, shader);
-            }
-
-            // MVPマトリックス計算
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
-                glm::mat4 mvp = proj * view * model;
-
-                // シェーダバインド
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                shader.SetUniform4f("u_Color", color.x, color.y, color.z, color.w);
-                // レンダラー描画
-                renderer.Draw(va, ib, shader);
-            }
-
-            // IMGUI処理
-            {
                 ImGui::Begin("Debug Menu");
-                obj.onImGuiRender();
-                ImGui::SliderFloat3("Translation A", &translationA.x, -4.0, 4.0f);
-                ImGui::SliderFloat3("Translation B", &translationB.x, -4.0, 4.0f);
-                ImGui::ColorEdit3("Color", (float*)&color);
+                if (obj != testmenu && ImGui::Button("<-"))
+                {
+                    delete obj;
+                    obj = testmenu;
+                }
+                obj->onImGuiRender();
                 // FPS表示
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
@@ -198,6 +115,12 @@ int main(void)
 
             /* glfwイベント処理 */
             glfwPollEvents();
+        }
+
+        delete obj;
+        if (obj != testmenu)
+        {
+            delete testmenu;
         }
     }
 

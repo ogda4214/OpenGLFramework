@@ -10,9 +10,9 @@ namespace Prototype
 		ClearColorObject();
 		virtual ~ClearColorObject();
 
-		virtual void onUpdate(float deltatime) override;
-		virtual void onRender() override;
-		virtual void onImGuiRender() override;
+		void onUpdate(float deltatime) override;
+		void onRender() override;
+		void onImGuiRender() override;
 	private:
 		float m_Color[4];
 	};
